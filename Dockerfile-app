@@ -17,9 +17,14 @@ COPY modules/ /etc/ldap.dist/modules
 
 COPY entrypoint.sh /entrypoint.sh
 
-EXPOSE 389
+# hack our timezone; should not be needed though
+RUN ln -fs /usr/share/zoneinfo/Pacific/Auckland /etc/localtime
+RUN dpkg-reconfigure -f noninteractive tzdata
 
-VOLUME ["/etc/ldap", "/var/lib/ldap"]
+# here we keep our backups
+RUN mkdir /backup
+# here we restore from
+RUN mkdir /restore
 
 ENTRYPOINT ["/entrypoint.sh"]
 

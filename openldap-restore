@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# restore backup in directory /restore to directory /
+# name of archive is openldap
+cd /
+/tar-restore /restore / openldap

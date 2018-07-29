@@ -1,3 +1,31 @@
+# Open LDAP as a Docker service
+
+Openldap runs as a service, using a data container.
+
+Data can be backed up and restored using the backup and restore containers
+
+## usage
+
+    make build; make run
+
+## backup
+
+All data resides in directories /etc/ldap and /var/lib/ldap
+Data is backed up to directory /backup (tar.gz file).
+To back up, use command:
+
+    docker start openldap-app-backup
+
+Use `docker cp openldap-app:/backup <dest>` to get backups out of container.
+
+## restore
+
+Archive to restore must be one created above (format: 20180724.openldap.tar.gz).
+Use `docker cp <archive> openldap-app:/restore` to get archive into container.
+To restore, use command:
+
+    docker start openldap-app-restore
+
 docker-openldap
 ===============
 
@@ -51,73 +79,13 @@ branch. This helps to reconfigure the server without interruption (read the
 * `SLAPD_ADDITIONAL_SCHEMAS` - loads additional schemas provided in the `slapd`
 package that are not installed using the environment variable with comma-separated
 enties. As of writing these instructions, there are the following additional schemas
-available: `collective`, `corba`, `duaconf`, `dyngroup`, `java`, `misc`, `openldap`,
-`pmi` and `ppolicy`.
+available: `collective`, `corba`, `duaconf`, `dyngroup`, `java`, `misc`, `openldap` and `pmi`.
 * `SLAPD_ADDITIONAL_MODULES` - comma-separated list of modules to load. It will try
-to run `.ldif` files with a corresponsing name from the `module` directory.
-Currently only `memberof` and `ppolicy` are avaliable.
+to run `.ldif` files with a corresponsing name from the `modules` directory.
 
 * `SLAPD_FORCE_RECONFIGURE` - (defaults to false)  Used if one needs to reconfigure
 the `slapd` service after the image has been initialized.  Set this value to `true`
 to reconfigure the image.
-
-### Setting up ppolicy
-
-The ppolicy module provides enhanced password management capabilities that are
-applied to non-rootdn bind attempts in OpenLDAP. In order to it, one has to load
-both the schema `ppolicy` and the module `ppolicy`:
-
-    -e SLAPD_DOMAIN=ldap.example.org -e SLAPD_ADDITIONAL_SCHEMAS=ppolicy -e SLAPD_ADDITIONAL_MODULES=ppolicy`
-
-There is one additional environment variable available:
-
-* `SLAPD_PPOLICY_DN_PREFIX` - (defaults to `cn=default,ou=policies`) sets the dn
-prefix used in `modules/ppolicy.ldif` for the `olcPPolicyDefault` attribute.  The
-value used for `olcPPolicyDefault` is derived from `$SLAPD_PPOLICY_DN_PREFIX,(dc
-component parts from $SLAPD_DOMAIN)`.
-
-After loading the module, you have to load a default password policy. The 
-contents of `default-policy.ldif` should look something like this:
-
-```
-# Define password policy
-dn: ou=policies,dc=ldap,dc=example,dc=org
-objectClass: organizationalUnit
-ou: policies
-
-dn: cn=default,ou=policies,dc=ldap,dc=example,dc=org
-objectClass: applicationProcess
-objectClass: pwdPolicy
-cn: default
-pwdAllowUserChange: TRUE
-pwdAttribute: userPassword
-pwdCheckQuality: 1
-# 7 days
-pwdExpireWarning: 604800
-pwdFailureCountInterval: 0
-pwdGraceAuthNLimit: 0
-pwdInHistory: 5
-pwdLockout: TRUE
-# 30 minutes
-pwdLockoutDuration: 1800
-# 180 days
-pwdMaxAge: 15552000
-pwdMaxFailure: 5
-pwdMinAge: 0
-pwdMinLength: 6
-pwdMustChange: TRUE
-pwdSafeModify: FALSE
-```
-
-See the [docs](http://www.zytrax.com/books/ldap/ch6/ppolicy.html) for descriptions
-on the available attributes and what they mean.
-
-Assuming you are on a host that has the client side tools installed (maybe you 
-have to change the hostname as well), run:
-
-    ldapadd -h localhost -x -c -D 'cn=admin,dc=ldap,dc=example,dc=org' -w [$SLAPD_PASSWORD] -f default-policy.ldif
-
-or use the prepopulation capability described below.
 
 Prepopulate with data
 ---------------------

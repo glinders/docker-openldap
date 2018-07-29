@@ -1,0 +1,8 @@
+dn: ou=people,dc=salcom,dc=com
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=salcom,dc=com
+objectClass: organizationalUnit
+ou: groups
+

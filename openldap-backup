@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# backup selected directories and files in /; name it 'openldap'
+cd /
+/tar-backup openldap etc/ldap var/lib/ldap
