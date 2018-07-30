@@ -12,12 +12,15 @@ DATA_IMAGE = $(DATA_NAME):$(VERSION)
 BACKUP_IMAGE = $(BACKUP_NAME):$(VERSION)
 RESTORE_IMAGE = $(RESTORE_NAME):$(VERSION)
 
+# additional names
+LDIF_VOLUME = $(CURDIR)/ldif_volume
+
 # port numbers and IP addresses
 #
 # port number used by application in container
 APP_PORT_CONTAINER = 389
 # port number to map to on host machine
-APP_PORT_HOST = 389
+APP_PORT_HOST = 8389
 # address of local host. Don't use 0.0.0.0 or leave blank
 # the 127 address limits container access to the local machine only
 # todo test LOCALHOST = 127.0.0.1
@@ -29,7 +32,7 @@ LOCALHOST = 127.0.0.1
 DATAVOLUME = $(DATA_NAME)
 
 # environment variables to pass
-ENVVARS = 
+ENVVARS = -e SLAPD_PASSWORD=admin -e SLAPD_DOMAIN=salcom.com
 # links to other containers
 LINKS =
 # volumes exposed by the data container
@@ -39,7 +42,7 @@ VOLUMES_FROM = --volumes-from $(DATAVOLUME)
 # port assignments
 PORTS = -p $(LOCALHOST):$(APP_PORT_HOST):$(APP_PORT_CONTAINER)
 # additional run options
-RUN_OPTIONS = --restart=no
+RUN_OPTIONS = --restart=no -v $(LDIF_VOLUME):/etc/ldap.dist/prepopulate
 #
 .PHONY: build build_app build_data run run-app create-data create-backup create-restore start stop rm rmi mv-app mv-data mv-backup mv-restore
 
@@ -121,6 +124,7 @@ mv-app: stop
 	if docker inspect $(SERVICE_NAME) >/dev/null 2>&1; then \
 		$(eval CONTAINERS = $(shell docker container ls --all --format "{{.Names}}" --filter name=^/${SERVICE_NAME}$$ --filter name=^/${SERVICE_NAME}.old$$|sort -r)) \
 		echo application containers found $(CONTAINERS) ; \
+		$(if ifeq($(CONTAINERS),),$(shell bash -c "echo nothing to do")) \
 		$(foreach C,$(CONTAINERS),$(shell bash -c "echo rename $(C); docker rm $(C).old; docker container rename $(C) $(C).old; echo done;")) ; \
 	fi
 
@@ -129,6 +133,7 @@ mv-data: stop
 	if docker inspect $(DATA_NAME) >/dev/null 2>&1; then \
 		$(eval CONTAINERS = $(shell docker container ls --all --format "{{.Names}}" --filter name=^/${DATA_NAME}$$ --filter name=^/${DATA_NAME}.old$$|sort -r)) \
 		echo data containers found $(CONTAINERS) ; \
+		$(if ifeq($(CONTAINERS),),$(shell bash -c "echo nothing to do")) \
 		$(foreach C,$(CONTAINERS),$(shell bash -c "echo rename $(C); docker rm $(C).old; docker container rename $(C) $(C).old; echo done;")) ; \
 	fi
 
@@ -137,6 +142,7 @@ mv-backup: stop
 	if docker inspect $(BACKUP_NAME) >/dev/null 2>&1; then \
 		$(eval CONTAINERS = $(shell docker container ls --all --format "{{.Names}}" --filter name=^/${BACKUP_NAME}$$ --filter name=^/${BACKUP_NAME}.old$$|sort -r)) \
 		echo backup containers found $(CONTAINERS) ; \
+		$(if ifeq($(CONTAINERS),),$(shell bash -c "echo nothing to do")) \
 		$(foreach C,$(CONTAINERS),$(shell bash -c "echo rename $(C); docker rm $(C).old; docker container rename $(C) $(C).old; echo done;")) ; \
 	fi
 
@@ -145,6 +151,7 @@ mv-restore: stop
 	if docker inspect $(RESTORE_NAME) >/dev/null 2>&1; then \
 		$(eval CONTAINERS = $(shell docker container ls --all --format "{{.Names}}" --filter name=^/${RESTORE_NAME}$$ --filter name=^/${RESTORE_NAME}.old$$|sort -r)) \
 		echo restore containers found $(CONTAINERS) ; \
+		$(if ifeq($(CONTAINERS),),$(shell bash -c "echo nothing to do")) \
 		$(foreach C,$(CONTAINERS),$(shell bash -c "echo rename $(C); docker rm $(C).old; docker container rename $(C) $(C).old; echo done;")) ; \
 	fi
 
