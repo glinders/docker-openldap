@@ -9,4 +9,6 @@ ADD common-backup /common-restore
 ADD tar-restore /tar-restore
 ADD openldap-restore /openldap-restore
 
-CMD ["/openldap-restore"]
+# overrule the application with our command
+ENTRYPOINT ["/openldap-restore"]
+CMD [""]

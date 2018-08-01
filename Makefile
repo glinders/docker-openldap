@@ -89,11 +89,11 @@ create-data: mv-data
 
 create-backup: create-data mv-backup
 	# create the backup container
-	docker create $(RUN_OPTIONS) $(VOLUMES_FROM) --name $(BACKUP_NAME) $(BACKUP_IMAGE)
+	docker create $(VOLUMES_FROM) --name $(BACKUP_NAME) $(BACKUP_IMAGE)
 
 create-restore: create-data mv-restore
 	# create the restore container
-	docker create $(RUN_OPTIONS) $(VOLUMES_FROM) --name $(RESTORE_NAME) $(RESTORE_IMAGE)
+	docker create $(VOLUMES_FROM) --name $(RESTORE_NAME) $(RESTORE_IMAGE)
 
 # starting and stopping application container
 #
