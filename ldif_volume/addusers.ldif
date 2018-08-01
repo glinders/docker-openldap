@@ -5,8 +5,8 @@ uid: admin
 sn: User
 cn: Admin User
 userPassword: admin
-uidNumber: 1000
-gidNumber: 1000
+uidNumber: 10000
+gidNumber: 10000
 homeDirectory: /home/admin
 
 dn: uid=geert,ou=people,dc=salcom,dc=com
@@ -16,7 +16,7 @@ uid: geert
 sn: Linders
 cn: Geert Linders
 userPassword: geert
-uidNumber: 1001
-gidNumber: 1001
+uidNumber: 10001
+gidNumber: 10000
 homeDirectory: /home/geert
 

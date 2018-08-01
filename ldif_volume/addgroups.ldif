@@ -6,3 +6,7 @@ dn: ou=groups,dc=salcom,dc=com
 objectClass: organizationalUnit
 ou: groups
 
+dn: cn=users,ou=groups,dc=salcom,dc=com
+objectClass: posixGroup
+gidNumber: 10000
+cn: users
